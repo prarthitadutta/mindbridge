@@ -25,13 +25,14 @@ function BookingForm() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [availability, setAvailability] = useState<Record<string, string[]>>({});
-  const [availableDates, setAvailableDates] = useState<{ value: string; label: string }[]>([]);
+  const [availableDates, setAvailableDates] = useState<{ value: string; label: string; dayName: string }[]>([]);
   const [availableTimeSlots, setAvailableTimeSlots] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
   const [sessionType, setSessionType] = useState("Video Call");
   const [concern, setConcern] = useState("");
   const [notes, setNotes] = useState("");
+  const [therapistEmail, setTherapistEmail] = useState("");
 
   const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
@@ -40,7 +41,7 @@ function BookingForm() {
     const fetchAvailability = async () => {
       const { data, error } = await supabase
         .from("therapist_profiles")
-        .select("availability")
+        .select("availability, user_id")
         .eq("user_id", therapistId)
         .single();
 
@@ -50,6 +51,18 @@ function BookingForm() {
       }
 
       setAvailability(data.availability);
+
+      // Fetch therapist email from auth via profiles
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("id", data.user_id)
+        .single();
+
+      if (profileData) {
+        // We'll pass therapist user_id to the API and look up email server-side
+        setTherapistEmail(data.user_id); // using user_id as reference
+      }
 
       // Generate next 30 days, filter to only days therapist is available
       const dates = [];
@@ -67,19 +80,18 @@ function BookingForm() {
           });
         }
       }
-      setAvailableDates(dates as any);
+      setAvailableDates(dates);
     };
 
     fetchAvailability();
   }, [therapistId]);
 
-  // When date is selected, update available time slots
   useEffect(() => {
     if (!selectedDate) return;
     const d = new Date(selectedDate);
     const dayName = dayNames[d.getDay()];
     setAvailableTimeSlots(availability[dayName] || []);
-    setSelectedTime(""); // reset time when date changes
+    setSelectedTime("");
   }, [selectedDate, availability]);
 
   const saveBooking = async (user: any) => {
@@ -108,6 +120,7 @@ function BookingForm() {
           userEmail: user.email,
           userName: user.email?.split("@")[0],
           therapistName,
+          therapistUserId: therapistEmail, // passing user_id to look up on server
           date: new Date(selectedDate).toLocaleDateString("en-IN", {
             weekday: "long", day: "numeric", month: "long",
           }),
@@ -207,7 +220,7 @@ function BookingForm() {
                   <p className="text-sm text-gray-500">Loading available dates...</p>
                 ) : (
                   <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                    {availableDates.map((d: any) => (
+                    {availableDates.map((d) => (
                       <button
                         key={d.value}
                         onClick={() => setSelectedDate(d.value)}
