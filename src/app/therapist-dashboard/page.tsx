@@ -17,6 +17,7 @@ type Booking = {
   is_pro_bono: boolean;
   status: string;
   created_at: string;
+  meeting_link: string;
 };
 
 type Profile = {
@@ -69,9 +70,13 @@ export default function TherapistDashboard() {
   };
 
   const updateBookingStatus = async (bookingId: string, status: string) => {
+    const meetingLink = status === "confirmed"
+      ? `https://meet.jit.si/mindbridge-${bookingId}`
+      : undefined;
+
     const { error } = await supabase
       .from("bookings")
-      .update({ status })
+      .update({ status, ...(meetingLink && { meeting_link: meetingLink }) })
       .eq("id", bookingId);
 
     if (error) {
@@ -79,7 +84,7 @@ export default function TherapistDashboard() {
     } else {
       toast.success(`Booking ${status} ✅`);
       setBookings((prev) =>
-        prev.map((b) => (b.id === bookingId ? { ...b, status } : b))
+        prev.map((b) => (b.id === bookingId ? { ...b, status, ...(meetingLink && { meeting_link: meetingLink }) } : b))
       );
 
       if (status === "confirmed") {
@@ -99,6 +104,7 @@ export default function TherapistDashboard() {
               patientName: patientProfile?.full_name || "Patient",
               therapistName: therapistProfile.full_name,
               therapistUserId: therapistProfile.user_id,
+              meetingLink: meetingLink,
               date: new Date(booking.date).toLocaleDateString("en-IN", {
                 weekday: "long", day: "numeric", month: "long",
               }),
@@ -322,6 +328,24 @@ export default function TherapistDashboard() {
                           </>
                         )}
                       </div>
+
+                      {/* Meeting link for confirmed video call sessions */}
+                      {b.status === "confirmed" && b.session_type === "Video Call" && b.meeting_link && (
+                        <div className="mt-3 bg-green-50 border border-green-200 rounded-xl p-3 flex items-center justify-between">
+                          <div>
+                            <p className="text-xs text-green-600 font-medium mb-1">🎥 Video Call Link</p>
+                            <p className="text-xs text-gray-500">Click to join at the scheduled time</p>
+                          </div>
+                          
+                            href={b.meeting_link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="bg-green-500 text-white text-xs font-semibold px-4 py-2 rounded-xl hover:bg-green-600 transition"
+                          >
+                            Join Call
+                          </a>
+                        </div>
+                      )}
                     </div>
 
                     {/* Action buttons */}
