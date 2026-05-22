@@ -24,6 +24,7 @@ function BookingForm() {
 
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [availabilityError, setAvailabilityError] = useState("");
   const [availability, setAvailability] = useState<Record<string, string[]>>({});
   const [availableDates, setAvailableDates] = useState<{ value: string; label: string; dayName: string }[]>([]);
   const [availableTimeSlots, setAvailableTimeSlots] = useState<string[]>([]);
@@ -32,7 +33,7 @@ function BookingForm() {
   const [sessionType, setSessionType] = useState("Video Call");
   const [concern, setConcern] = useState("");
   const [notes, setNotes] = useState("");
-  const [therapistEmail, setTherapistEmail] = useState("");
+  const [therapistUserId, setTherapistUserId] = useState("");
 
   const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
@@ -45,27 +46,21 @@ function BookingForm() {
         .eq("user_id", therapistId)
         .single();
 
-      if (error || !data?.availability) {
-        toast.error("Could not load therapist availability");
+      if (error) {
+        setAvailabilityError("Could not load therapist availability. Please try again.");
+        return;
+      }
+
+      if (!data?.availability || Object.keys(data.availability).length === 0) {
+        setAvailabilityError("This therapist hasn't set their availability yet. Please try another therapist or check back later.");
         return;
       }
 
       setAvailability(data.availability);
-
-      // Fetch therapist email from auth via profiles
-      const { data: profileData } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("id", data.user_id)
-        .single();
-
-      if (profileData) {
-        // We'll pass therapist user_id to the API and look up email server-side
-        setTherapistEmail(data.user_id); // using user_id as reference
-      }
+      setTherapistUserId(data.user_id);
 
       // Generate next 30 days, filter to only days therapist is available
-      const dates = [];
+      const dates: { value: string; label: string; dayName: string }[] = [];
       for (let i = 1; i <= 30; i++) {
         const d = new Date();
         d.setDate(d.getDate() + i);
@@ -120,7 +115,7 @@ function BookingForm() {
           userEmail: user.email,
           userName: user.email?.split("@")[0],
           therapistName,
-          therapistUserId: therapistEmail, // passing user_id to look up on server
+          therapistUserId,
           date: new Date(selectedDate).toLocaleDateString("en-IN", {
             weekday: "long", day: "numeric", month: "long",
           }),
@@ -209,15 +204,27 @@ function BookingForm() {
 
         <div className="bg-white rounded-3xl shadow-sm p-8">
 
+          {/* Availability Error */}
+          {availabilityError && step === 1 && (
+            <div className="flex flex-col items-center gap-4 py-6 text-center">
+              <div className="text-5xl">😔</div>
+              <h2 className="text-lg font-semibold text-gray-800">Availability Not Set</h2>
+              <p className="text-sm text-gray-500 max-w-sm">{availabilityError}</p>
+              <Link href="/therapists" className="bg-[#4A90D9] text-white font-semibold py-3 px-6 rounded-xl hover:bg-[#357ABD] transition">
+                Browse Other Therapists
+              </Link>
+            </div>
+          )}
+
           {/* Step 1 — Date & Time */}
-          {step === 1 && (
+          {step === 1 && !availabilityError && (
             <div className="flex flex-col gap-6">
               <h2 className="text-lg font-semibold text-gray-800">Choose Date & Time</h2>
 
               <div>
                 <label className="text-sm font-medium text-gray-700 mb-3 block">Select a Date</label>
                 {availableDates.length === 0 ? (
-                  <p className="text-sm text-gray-500">Loading available dates...</p>
+                  <p className="text-sm text-gray-500 animate-pulse">Loading available dates...</p>
                 ) : (
                   <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                     {availableDates.map((d) => (
