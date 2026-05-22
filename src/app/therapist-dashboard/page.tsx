@@ -81,6 +81,33 @@ export default function TherapistDashboard() {
       setBookings((prev) =>
         prev.map((b) => (b.id === bookingId ? { ...b, status } : b))
       );
+
+      if (status === "confirmed") {
+        const booking = bookings.find((b) => b.id === bookingId);
+        if (booking) {
+          const { data: patientProfile } = await supabase
+            .from("profiles")
+            .select("full_name")
+            .eq("id", booking.user_id)
+            .single();
+
+          await fetch("/api/send-confirmation-email", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              patientUserId: booking.user_id,
+              patientName: patientProfile?.full_name || "Patient",
+              therapistName: therapistProfile.full_name,
+              therapistUserId: therapistProfile.user_id,
+              date: new Date(booking.date).toLocaleDateString("en-IN", {
+                weekday: "long", day: "numeric", month: "long",
+              }),
+              time: booking.time,
+              sessionType: booking.session_type,
+            }),
+          });
+        }
+      }
     }
   };
 
