@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
+import { createClient } from "@supabase/supabase-js";
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -25,7 +26,7 @@ const emailHTML = (title: string, greeting: string, body: string, details: Recor
 `;
 
 export async function POST(req: Request) {
-  const { userEmail, userName, therapistName, therapistEmail, date, time, sessionType, concern, isProBono, fee } = await req.json();
+  const { userEmail, userName, therapistName, therapistUserId, date, time, sessionType, concern, isProBono, fee } = await req.json();
 
   const details = {
     Therapist: therapistName,
@@ -37,6 +38,17 @@ export async function POST(req: Request) {
   };
 
   try {
+    // Look up therapist email using service role
+    let therapistEmail = "";
+    if (therapistUserId) {
+      const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      );
+      const { data } = await supabaseAdmin.auth.admin.getUserById(therapistUserId);
+      therapistEmail = data?.user?.email || "";
+    }
+
     // Email to patient
     await transporter.sendMail({
       from: `"MindBridge" <${process.env.GMAIL_USER}>`,
@@ -50,7 +62,7 @@ export async function POST(req: Request) {
       ),
     });
 
-    // Email to therapist (if email provided)
+    // Email to therapist
     if (therapistEmail) {
       await transporter.sendMail({
         from: `"MindBridge" <${process.env.GMAIL_USER}>`,
