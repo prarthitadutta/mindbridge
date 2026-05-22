@@ -43,7 +43,7 @@ function BookingForm() {
       const { data, error } = await supabase
         .from("therapist_profiles")
         .select("availability, user_id")
-        .eq("user_id", therapistId)
+        .eq("id", therapistId)
         .single();
 
       if (error) {
@@ -59,7 +59,6 @@ function BookingForm() {
       setAvailability(data.availability);
       setTherapistUserId(data.user_id);
 
-      // Generate next 30 days, filter to only days therapist is available
       const dates: { value: string; label: string; dayName: string }[] = [];
       for (let i = 1; i <= 30; i++) {
         const d = new Date();
