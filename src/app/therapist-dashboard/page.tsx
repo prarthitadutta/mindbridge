@@ -337,9 +337,9 @@ export default function TherapistDashboard() {
                             <p className="text-xs text-gray-500">Click to join at the scheduled time</p>
                           </div>
                           
-                            href={b.meeting_link}
+                            <a href={b.meeting_link}
                             target="_blank"
-                            rel="noopener noreferrer"
+                            rel="noreferrer"
                             className="bg-green-500 text-white text-xs font-semibold px-4 py-2 rounded-xl hover:bg-green-600 transition"
                           >
                             Join Call
