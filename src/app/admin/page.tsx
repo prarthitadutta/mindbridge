@@ -452,7 +452,7 @@ export default function AdminPanel() {
                               <div className="mt-3 flex flex-wrap gap-3">
                                 {t.phone && (
                                   
-                                    href={`tel:${t.phone}`}
+                                    href={"tel:" + t.phone}
                                     className="flex items-center gap-1.5 text-xs bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full hover:bg-gray-200 transition"
                                   >
                                     📞 {t.phone}
@@ -460,7 +460,7 @@ export default function AdminPanel() {
                                 )}
                                 {t.contact_email && (
                                   
-                                    href={`mailto:${t.contact_email}`}
+                                    href={"mailto:" + t.contact_email}
                                     className="flex items-center gap-1.5 text-xs bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full hover:bg-gray-200 transition"
                                   >
                                     ✉️ {t.contact_email}
