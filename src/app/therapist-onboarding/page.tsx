@@ -38,6 +38,8 @@ export default function TherapistOnboarding() {
     specialties: [] as string[],
     languages: [] as string[],
     populations: [] as string[],
+    phone: "",
+    contact_email: "",
   });
 
   const toggle = (field: "specialties" | "languages" | "populations", value: string) => {
@@ -59,13 +61,11 @@ export default function TherapistOnboarding() {
       return;
     }
 
-    // Update profile role to therapist
     await supabase
       .from("profiles")
-      .update({ role: "therapist" })
+      .update({ role: "pending_therapist" })
       .eq("id", user.id);
 
-    // Insert therapist profile
     const { error } = await supabase
       .from("therapist_profiles")
       .upsert({
@@ -80,6 +80,8 @@ export default function TherapistOnboarding() {
         specialties: form.specialties,
         languages: form.languages,
         populations: form.populations,
+        phone: form.phone,
+        contact_email: form.contact_email,
         is_verified: false,
         is_available: true,
       });
@@ -89,7 +91,7 @@ export default function TherapistOnboarding() {
       setLoading(false);
     } else {
       toast.success("Profile submitted! We'll verify you shortly 🌸");
-      router.push("/dashboard");
+      router.push("/under-review");
     }
   };
 
@@ -196,10 +198,44 @@ export default function TherapistOnboarding() {
                 </div>
               </div>
 
+              {/* Admin-only contact details */}
+              <div className="border border-dashed border-gray-200 rounded-2xl p-4 flex flex-col gap-4 bg-gray-50">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full font-medium">🔒 Admin only — not visible to patients</span>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">Phone Number *</label>
+                  <input
+                    type="tel"
+                    value={form.phone}
+                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                    placeholder="+91 98765 43210"
+                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#4A90D9] bg-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">Contact Email *</label>
+                  <input
+                    type="email"
+                    value={form.contact_email}
+                    onChange={(e) => setForm({ ...form, contact_email: e.target.value })}
+                    placeholder="your@email.com"
+                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#4A90D9] bg-white"
+                  />
+                  <p className="text-xs text-gray-400 mt-1 ml-1">Used by MindBridge admin to contact you if needed. Never shown publicly.</p>
+                </div>
+              </div>
+
               <button
                 onClick={() => {
                   if (!form.full_name || !form.bio || !form.education) {
                     toast.error("Please fill in all required fields");
+                    return;
+                  }
+                  if (!form.phone || !form.contact_email) {
+                    toast.error("Please provide your contact details");
                     return;
                   }
                   setStep(2);
