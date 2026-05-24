@@ -17,6 +17,8 @@ type Therapist = {
   is_verified: boolean;
   is_available: boolean;
   created_at: string;
+  phone: string;
+  contact_email: string;
 };
 
 type User = {
@@ -96,7 +98,6 @@ export default function AdminPanel() {
         .update({ role: verified ? "therapist" : "pending_therapist" })
         .eq("id", therapist.user_id);
 
-      // Send welcome email when verifying
       if (verified) {
         try {
           const res = await fetch("/api/get-therapist-email", {
@@ -445,6 +446,28 @@ export default function AdminPanel() {
                                 </span>
                               ))}
                             </div>
+
+                            {/* Admin-only contact details */}
+                            {(t.phone || t.contact_email) && (
+                              <div className="mt-3 flex flex-wrap gap-3">
+                                {t.phone && (
+                                  
+                                    href={`tel:${t.phone}`}
+                                    className="flex items-center gap-1.5 text-xs bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full hover:bg-gray-200 transition"
+                                  >
+                                    📞 {t.phone}
+                                  </a>
+                                )}
+                                {t.contact_email && (
+                                  
+                                    href={`mailto:${t.contact_email}`}
+                                    className="flex items-center gap-1.5 text-xs bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full hover:bg-gray-200 transition"
+                                  >
+                                    ✉️ {t.contact_email}
+                                  </a>
+                                )}
+                              </div>
+                            )}
                           </div>
                         </div>
                         <div className="flex flex-col gap-2">
