@@ -89,7 +89,6 @@ export default function AdminPanel() {
       .update({ is_verified: verified })
       .eq("id", id);
 
-    // Also update their role in profiles table
     const therapist = therapists.find((t) => t.id === id);
     if (therapist) {
       await supabase
@@ -143,6 +142,24 @@ export default function AdminPanel() {
     }
   };
 
+  // Reset a stuck pending_therapist back to user role
+  const resetPendingUser = async (userId: string, name: string) => {
+    if (!confirm(`Reset "${name}" back to a regular user? They will need to sign up as a therapist again.`)) return;
+    const { error } = await supabase
+      .from("profiles")
+      .update({ role: "user" })
+      .eq("id", userId);
+
+    if (error) {
+      toast.error("Failed to reset");
+    } else {
+      toast.success(`${name} reset to user ✅`);
+      setUsers((prev) =>
+        prev.map((u) => (u.id === userId ? { ...u, role: "user" } : u))
+      );
+    }
+  };
+
   if (loading) {
     return (
       <main className="min-h-screen bg-[#fdf6f0] flex items-center justify-center">
@@ -170,6 +187,12 @@ export default function AdminPanel() {
       </main>
     );
   }
+
+  // Users who have pending_therapist role but never completed onboarding
+  const therapistUserIds = new Set(therapists.map((t) => t.user_id));
+  const incompleteOnboarding = users.filter(
+    (u) => u.role === "pending_therapist" && !therapistUserIds.has(u.id)
+  );
 
   const stats = [
     { label: "Total Users", value: users.length, color: "bg-blue-50 text-blue-700", icon: "👥" },
@@ -232,6 +255,12 @@ export default function AdminPanel() {
               }`}
             >
               {tab}
+              {/* Badge for incomplete onboarding on therapists tab */}
+              {tab === "therapists" && incompleteOnboarding.length > 0 && (
+                <span className="ml-1.5 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5">
+                  {incompleteOnboarding.length}
+                </span>
+              )}
             </button>
           ))}
         </div>
@@ -305,88 +334,128 @@ export default function AdminPanel() {
 
         {/* Therapists Tab */}
         {activeTab === "therapists" && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="p-6 border-b border-gray-100">
-              <h3 className="font-semibold text-gray-800">
-                All Therapists ({therapists.length})
-              </h3>
-              <p className="text-xs text-gray-400 mt-1">
-                Verify therapists to grant them full access to MindBridge
-              </p>
-            </div>
-            <div className="divide-y divide-gray-50">
-              {therapists.length === 0 ? (
-                <div className="text-center py-12">
-                  <p className="text-3xl mb-2">🧑‍⚕️</p>
-                  <p className="text-gray-500 text-sm">No therapists yet</p>
+          <div className="flex flex-col gap-6">
+
+            {/* ── Incomplete Onboarding Section ── */}
+            {incompleteOnboarding.length > 0 && (
+              <div className="bg-white rounded-2xl shadow-sm border border-amber-200 overflow-hidden">
+                <div className="p-6 border-b border-amber-100 bg-amber-50">
+                  <h3 className="font-semibold text-amber-800">
+                    ⚠️ Incomplete Onboarding ({incompleteOnboarding.length})
+                  </h3>
+                  <p className="text-xs text-amber-600 mt-1">
+                    These users registered as therapists but never filled in their profile. They are stuck and cannot be found by patients.
+                  </p>
                 </div>
-              ) : (
-                therapists.map((t) => (
-                  <div key={t.id} className="p-6 hover:bg-gray-50 transition">
-                    <div className="flex items-start justify-between flex-wrap gap-4">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#4A90D9] to-[#7B5EA7] flex items-center justify-center text-white font-bold text-lg">
-                          {t.full_name?.charAt(0)}
+                <div className="divide-y divide-gray-50">
+                  {incompleteOnboarding.map((u) => (
+                    <div key={u.id} className="p-5 hover:bg-gray-50 transition flex items-center justify-between flex-wrap gap-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 font-bold">
+                          {u.full_name?.charAt(0) || "?"}
                         </div>
                         <div>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <p className="font-semibold text-gray-800">{t.full_name}</p>
-                            {t.is_verified ? (
-                              <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
-                                ✓ Verified
-                              </span>
-                            ) : (
-                              <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
-                                ⏳ Pending
-                              </span>
-                            )}
-                            {t.is_pro_bono && (
-                              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
-                                Pro Bono
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-sm text-gray-400">{t.education}</p>
-                          <p className="text-xs text-gray-400">📍 {t.location}</p>
-                          <div className="flex flex-wrap gap-1 mt-2">
-                            {t.specialties?.slice(0, 3).map((s) => (
-                              <span
-                                key={s}
-                                className="text-xs bg-[#f0f7ff] text-[#4A90D9] px-2 py-0.5 rounded-full"
-                              >
-                                {s}
-                              </span>
-                            ))}
-                          </div>
+                          <p className="font-medium text-gray-800 text-sm">{u.full_name || "Unknown"}</p>
+                          <p className="text-xs text-gray-400">{u.id.substring(0, 8)}...</p>
+                          <p className="text-xs text-amber-600 mt-0.5">Never completed therapist onboarding</p>
                         </div>
                       </div>
-                      <div className="flex flex-col gap-2">
-                        {!t.is_verified ? (
+                      <button
+                        onClick={() => resetPendingUser(u.id, u.full_name || "this user")}
+                        className="bg-amber-100 text-amber-700 text-xs font-semibold px-4 py-2 rounded-xl hover:bg-amber-200 transition"
+                      >
+                        Reset to User
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ── Verified / Pending Therapists ── */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="p-6 border-b border-gray-100">
+                <h3 className="font-semibold text-gray-800">
+                  All Therapists ({therapists.length})
+                </h3>
+                <p className="text-xs text-gray-400 mt-1">
+                  Verify therapists to grant them full access to MindBridge
+                </p>
+              </div>
+              <div className="divide-y divide-gray-50">
+                {therapists.length === 0 ? (
+                  <div className="text-center py-12">
+                    <p className="text-3xl mb-2">🧑‍⚕️</p>
+                    <p className="text-gray-500 text-sm">No therapists yet</p>
+                  </div>
+                ) : (
+                  therapists.map((t) => (
+                    <div key={t.id} className="p-6 hover:bg-gray-50 transition">
+                      <div className="flex items-start justify-between flex-wrap gap-4">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#4A90D9] to-[#7B5EA7] flex items-center justify-center text-white font-bold text-lg">
+                            {t.full_name?.charAt(0)}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <p className="font-semibold text-gray-800">{t.full_name}</p>
+                              {t.is_verified ? (
+                                <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                                  ✓ Verified
+                                </span>
+                              ) : (
+                                <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
+                                  ⏳ Pending
+                                </span>
+                              )}
+                              {t.is_pro_bono && (
+                                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                                  Pro Bono
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-sm text-gray-400">{t.education}</p>
+                            <p className="text-xs text-gray-400">📍 {t.location}</p>
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {t.specialties?.slice(0, 3).map((s) => (
+                                <span
+                                  key={s}
+                                  className="text-xs bg-[#f0f7ff] text-[#4A90D9] px-2 py-0.5 rounded-full"
+                                >
+                                  {s}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          {!t.is_verified ? (
+                            <button
+                              onClick={() => verifyTherapist(t.id, true)}
+                              className="bg-green-500 text-white text-xs font-semibold px-4 py-2 rounded-xl hover:bg-green-600 transition"
+                            >
+                              ✓ Verify & Approve
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => verifyTherapist(t.id, false)}
+                              className="bg-gray-100 text-gray-600 text-xs font-semibold px-4 py-2 rounded-xl hover:bg-gray-200 transition"
+                            >
+                              Unverify
+                            </button>
+                          )}
                           <button
-                            onClick={() => verifyTherapist(t.id, true)}
-                            className="bg-green-500 text-white text-xs font-semibold px-4 py-2 rounded-xl hover:bg-green-600 transition"
+                            onClick={() => deleteTherapist(t.id)}
+                            className="bg-red-100 text-red-600 text-xs font-semibold px-4 py-2 rounded-xl hover:bg-red-200 transition"
                           >
-                            ✓ Verify & Approve
+                            Delete
                           </button>
-                        ) : (
-                          <button
-                            onClick={() => verifyTherapist(t.id, false)}
-                            className="bg-gray-100 text-gray-600 text-xs font-semibold px-4 py-2 rounded-xl hover:bg-gray-200 transition"
-                          >
-                            Unverify
-                          </button>
-                        )}
-                        <button
-                          onClick={() => deleteTherapist(t.id)}
-                          className="bg-red-100 text-red-600 text-xs font-semibold px-4 py-2 rounded-xl hover:bg-red-200 transition"
-                        >
-                          Delete
-                        </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))
-              )}
+                  ))
+                )}
+              </div>
             </div>
           </div>
         )}
