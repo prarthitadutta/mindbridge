@@ -95,6 +95,31 @@ export default function AdminPanel() {
         .from("profiles")
         .update({ role: verified ? "therapist" : "pending_therapist" })
         .eq("id", therapist.user_id);
+
+      // Send welcome email when verifying
+      if (verified) {
+        try {
+          const res = await fetch("/api/get-therapist-email", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId: therapist.user_id }),
+          });
+          const { email } = await res.json();
+
+          if (email) {
+            await fetch("/api/send-verification-email", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                therapistEmail: email,
+                therapistName: therapist.full_name,
+              }),
+            });
+          }
+        } catch (e) {
+          console.error("Failed to send verification email:", e);
+        }
+      }
     }
 
     if (error) {
@@ -102,7 +127,7 @@ export default function AdminPanel() {
     } else {
       toast.success(
         verified
-          ? "Therapist verified ✅ They now have full access!"
+          ? "Therapist verified ✅ Welcome email sent!"
           : "Verification removed"
       );
       setTherapists((prev) =>
@@ -142,7 +167,6 @@ export default function AdminPanel() {
     }
   };
 
-  // Reset a stuck pending_therapist back to user role
   const resetPendingUser = async (userId: string, name: string) => {
     if (!confirm(`Reset "${name}" back to a regular user? They will need to sign up as a therapist again.`)) return;
     const { error } = await supabase
@@ -188,7 +212,6 @@ export default function AdminPanel() {
     );
   }
 
-  // Users who have pending_therapist role but never completed onboarding
   const therapistUserIds = new Set(therapists.map((t) => t.user_id));
   const incompleteOnboarding = users.filter(
     (u) => u.role === "pending_therapist" && !therapistUserIds.has(u.id)
@@ -255,7 +278,6 @@ export default function AdminPanel() {
               }`}
             >
               {tab}
-              {/* Badge for incomplete onboarding on therapists tab */}
               {tab === "therapists" && incompleteOnboarding.length > 0 && (
                 <span className="ml-1.5 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5">
                   {incompleteOnboarding.length}
@@ -335,8 +357,6 @@ export default function AdminPanel() {
         {/* Therapists Tab */}
         {activeTab === "therapists" && (
           <div className="flex flex-col gap-6">
-
-            {/* ── Incomplete Onboarding Section ── */}
             {incompleteOnboarding.length > 0 && (
               <div className="bg-white rounded-2xl shadow-sm border border-amber-200 overflow-hidden">
                 <div className="p-6 border-b border-amber-100 bg-amber-50">
@@ -372,7 +392,6 @@ export default function AdminPanel() {
               </div>
             )}
 
-            {/* ── Verified / Pending Therapists ── */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
               <div className="p-6 border-b border-gray-100">
                 <h3 className="font-semibold text-gray-800">
