@@ -206,7 +206,7 @@ export default function AdminPanel() {
             href="/dashboard"
             className="bg-[#4A90D9] text-white font-semibold px-6 py-3 rounded-xl hover:bg-[#357ABD] transition"
           >
-            ← Back to Dashboard
+            Back to Dashboard
           </Link>
         </div>
       </main>
@@ -248,7 +248,7 @@ export default function AdminPanel() {
           href="/dashboard"
           className="text-sm font-medium text-gray-500 hover:text-[#4A90D9] transition"
         >
-          ← Back to Dashboard
+          Back to Dashboard
         </Link>
       </nav>
 
@@ -421,11 +421,11 @@ export default function AdminPanel() {
                               <p className="font-semibold text-gray-800">{t.full_name}</p>
                               {t.is_verified ? (
                                 <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
-                                  ✓ Verified
+                                  Verified
                                 </span>
                               ) : (
                                 <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
-                                  ⏳ Pending
+                                  Pending
                                 </span>
                               )}
                               {t.is_pro_bono && (
@@ -446,25 +446,17 @@ export default function AdminPanel() {
                                 </span>
                               ))}
                             </div>
-
-                            {/* Admin-only contact details */}
                             {(t.phone || t.contact_email) && (
                               <div className="mt-3 flex flex-wrap gap-3">
                                 {t.phone && (
-                                  
-                                    href={"tel:" + t.phone}
-                                    className="flex items-center gap-1.5 text-xs bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full hover:bg-gray-200 transition"
-                                  >
+                                  <span className="flex items-center gap-1.5 text-xs bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full">
                                     📞 {t.phone}
-                                  </a>
+                                  </span>
                                 )}
                                 {t.contact_email && (
-                                  
-                                    href={"mailto:" + t.contact_email}
-                                    className="flex items-center gap-1.5 text-xs bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full hover:bg-gray-200 transition"
-                                  >
+                                  <span className="flex items-center gap-1.5 text-xs bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full">
                                     ✉️ {t.contact_email}
-                                  </a>
+                                  </span>
                                 )}
                               </div>
                             )}
@@ -476,7 +468,7 @@ export default function AdminPanel() {
                               onClick={() => verifyTherapist(t.id, true)}
                               className="bg-green-500 text-white text-xs font-semibold px-4 py-2 rounded-xl hover:bg-green-600 transition"
                             >
-                              ✓ Verify & Approve
+                              Verify and Approve
                             </button>
                           ) : (
                             <button
