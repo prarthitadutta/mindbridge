@@ -217,7 +217,7 @@ export default function Dashboard() {
     <main className="min-h-screen bg-gradient-to-br from-[#f0f7ff] via-[#f7f0ff] to-[#f0fff7]">
       <nav className="flex items-center justify-between px-8 py-5 bg-white/80 backdrop-blur-sm shadow-sm">
         <Link href="/" className="flex items-center gap-2">
-          <img src="/mindbridgelogo.png" alt="MindBridge" className="h-25 w-auto" />
+          <img src="/mindbridgelogo.png" alt="MindBridge" className="h-29 w-auto" />
         </Link>
         <div className="flex items-center gap-4">
           {isTherapist && (
