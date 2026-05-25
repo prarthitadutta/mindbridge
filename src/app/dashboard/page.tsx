@@ -68,6 +68,8 @@ export default function Dashboard() {
   const [moodCheckedToday, setMoodCheckedToday] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [announcement, setAnnouncement] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string>("user");
   const router = useRouter();
   const supabase = createClient();
 
@@ -91,17 +93,29 @@ export default function Dashboard() {
           .eq("id", user.id)
           .maybeSingle();
 
-        setIsTherapist(profile?.role === "therapist");
-        setIsAdmin(profile?.role === "admin");
+        const role = profile?.role || "user";
+        setUserRole(role);
+        setIsTherapist(role === "therapist");
+        setIsAdmin(role === "admin");
         setAvatarUrl(profile?.avatar_url || user.user_metadata?.avatar_url || null);
 
-        // Check streak
         const today = new Date().toDateString();
         const lastCheckin = profile?.last_checkin
           ? new Date(profile.last_checkin).toDateString()
           : null;
         setMoodCheckedToday(lastCheckin === today);
         setStreak(profile?.streak || 0);
+
+        // Fetch announcement based on role
+        const announcementRole = role === "therapist" ? "therapist" : "user";
+        const { data: announcementData } = await supabase
+          .from("announcements")
+          .select("content")
+          .eq("role", announcementRole)
+          .maybeSingle();
+        if (announcementData?.content) {
+          setAnnouncement(announcementData.content);
+        }
 
         const { data: bookingsData } = await supabase
           .from("bookings")
@@ -129,7 +143,6 @@ export default function Dashboard() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    const today = new Date().toDateString();
     if (moodCheckedToday) {
       toast("Already checked in today! 💙", { icon: "✅" });
       return;
@@ -195,7 +208,6 @@ export default function Dashboard() {
   const progressPct = totalSessions > 0 ? Math.round((completedSessions / totalSessions) * 100) : 0;
   const circumference = 2 * Math.PI * 20;
 
-  // Next session
   const nextSession = upcomingBookings.find((b) => b.status === "confirmed");
   const daysUntilNext = nextSession
     ? Math.ceil((new Date(nextSession.date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
@@ -229,15 +241,26 @@ export default function Dashboard() {
           <ProfileSkeleton />
         ) : (
           <>
+            {/* Announcement Banner */}
+            {announcement && (
+              <div className="bg-white border border-[#4A90D9]/20 rounded-2xl px-6 py-4 mb-6 flex items-start gap-3 shadow-sm">
+                <span className="text-xl mt-0.5">📢</span>
+                <div>
+                  <p className="text-xs font-semibold text-[#4A90D9] uppercase tracking-wide mb-1">
+                    From MindBridge
+                  </p>
+                  <p className="text-sm text-gray-700 leading-relaxed">{announcement}</p>
+                </div>
+              </div>
+            )}
+
             {/* Hero Welcome Card */}
             <div className="bg-gradient-to-br from-[#4A90D9] to-[#7B5EA7] rounded-3xl p-8 shadow-lg mb-6 text-white relative overflow-hidden">
-              {/* Background blobs */}
               <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -translate-y-10 translate-x-10" />
               <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/10 rounded-full translate-y-10 -translate-x-10" />
 
               <div className="relative flex items-center justify-between flex-wrap gap-6">
                 <div className="flex items-center gap-5">
-                  {/* Avatar */}
                   <div className="relative">
                     <div className="w-16 h-16 rounded-full bg-white/20 border-2 border-white/40 overflow-hidden flex items-center justify-center">
                       {avatarUrl ? (
@@ -272,15 +295,12 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                {/* Stats */}
                 <div className="flex gap-4 flex-wrap">
-                  {/* Streak */}
                   <div className="bg-white/20 rounded-2xl px-5 py-4 text-center backdrop-blur-sm">
                     <p className="text-2xl font-bold">🔥 {streak}</p>
                     <p className="text-xs text-white/80 mt-1">Day Streak</p>
                   </div>
 
-                  {/* Progress ring */}
                   <div className="bg-white/20 rounded-2xl px-5 py-4 text-center backdrop-blur-sm">
                     <div className="relative w-12 h-12 mx-auto">
                       <svg viewBox="0 0 50 50" className="w-12 h-12 -rotate-90">
@@ -302,7 +322,6 @@ export default function Dashboard() {
                     <p className="text-xs text-white/80 mt-1">Progress</p>
                   </div>
 
-                  {/* Next session */}
                   {daysUntilNext !== null && (
                     <div className="bg-white/20 rounded-2xl px-5 py-4 text-center backdrop-blur-sm">
                       <p className="text-2xl font-bold">{daysUntilNext}d</p>
