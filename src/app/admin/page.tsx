@@ -234,8 +234,8 @@ export default function AdminPanel() {
   return (
     <main className="min-h-screen" style={{ background: "#F4F1EB" }}>
       <nav className="flex items-center justify-between px-8 py-5 bg-white border-b" style={{ borderColor: "#d6cfc4" }}>
-        <Link href="/" className="text-2xl font-bold" style={{ color: "#2D6A4F" }}>
-          Mind<span style={{ color: "#E76F51" }}>Bridge</span>
+        <Link href="/" className="text-2xl font-bold" style={{ color: "#4A90D9" }}>
+          Mind<span style={{ color: "#C084A0" }}>Bridge</span>
           <span className="ml-2 text-xs px-2 py-0.5 rounded-full font-normal" style={{ background: "#fef3ee", color: "#c45a3c" }}>Admin</span>
         </Link>
         <Link href="/dashboard" className="text-sm transition" style={{ color: "#7a6a5a" }}>
