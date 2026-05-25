@@ -59,7 +59,6 @@ export default function SignUp() {
     }
   };
 
-  // Step 1 — Role selection
   if (!role) {
     return (
       <main className="min-h-screen bg-gradient-to-br from-[#f0f7ff] via-[#f7f0ff] to-[#f0fff7] flex items-center justify-center px-4">
@@ -117,7 +116,6 @@ export default function SignUp() {
     );
   }
 
-  // Step 2 — Fill in details
   return (
     <main className="min-h-screen bg-gradient-to-br from-[#f0f7ff] via-[#f7f0ff] to-[#f0fff7] flex items-center justify-center px-4">
       <div className="bg-white rounded-3xl shadow-lg p-8 w-full max-w-md">
@@ -154,7 +152,7 @@ export default function SignUp() {
               onChange={(e) => setFullName(e.target.value)}
               onBlur={() => setTouched((t) => ({ ...t, fullName: true }))}
               placeholder="Your name"
-              className={`w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 transition ${
+              className={`w-full border rounded-xl px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 transition ${
                 touched.fullName && errors.fullName
                   ? "border-red-400 focus:ring-red-200 bg-red-50"
                   : "border-gray-200 focus:ring-[#4A90D9]"
@@ -173,7 +171,7 @@ export default function SignUp() {
               onChange={(e) => setEmail(e.target.value)}
               onBlur={() => setTouched((t) => ({ ...t, email: true }))}
               placeholder="you@example.com"
-              className={`w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 transition ${
+              className={`w-full border rounded-xl px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 transition ${
                 touched.email && errors.email
                   ? "border-red-400 focus:ring-red-200 bg-red-50"
                   : "border-gray-200 focus:ring-[#4A90D9]"
@@ -192,7 +190,7 @@ export default function SignUp() {
               onChange={(e) => setPassword(e.target.value)}
               onBlur={() => setTouched((t) => ({ ...t, password: true }))}
               placeholder="Min 6 characters"
-              className={`w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 transition ${
+              className={`w-full border rounded-xl px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 transition ${
                 touched.password && errors.password
                   ? "border-red-400 focus:ring-red-200 bg-red-50"
                   : "border-gray-200 focus:ring-[#4A90D9]"

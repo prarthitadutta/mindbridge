@@ -69,7 +69,7 @@ function LoginForm() {
               onChange={(e) => setEmail(e.target.value)}
               onBlur={() => setTouched((t) => ({ ...t, email: true }))}
               placeholder="you@example.com"
-              className={`w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 transition ${
+              className={`w-full border rounded-xl px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 transition ${
                 touched.email && errors.email
                   ? "border-red-400 focus:ring-red-200 bg-red-50"
                   : "border-gray-200 focus:ring-[#4A90D9]"
@@ -88,7 +88,7 @@ function LoginForm() {
               onChange={(e) => setPassword(e.target.value)}
               onBlur={() => setTouched((t) => ({ ...t, password: true }))}
               placeholder="Your password"
-              className={`w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 transition ${
+              className={`w-full border rounded-xl px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 transition ${
                 touched.password && errors.password
                   ? "border-red-400 focus:ring-red-200 bg-red-50"
                   : "border-gray-200 focus:ring-[#4A90D9]"
