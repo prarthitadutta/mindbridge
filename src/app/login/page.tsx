@@ -49,7 +49,7 @@ function LoginForm() {
       <div className="bg-white rounded-3xl shadow-lg p-8 w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/">
-            <img src="/mindbridgelogo.png" alt="MindBridge" className="h-20 w-auto mx-auto" />
+            <img src="/mindbridgelogo.png" alt="MindBridge" className="mx-auto" style={{ height: "150px", width: "auto" }} />
           </Link>
           <p className="text-gray-500 text-sm mt-2">Welcome back 💙</p>
         </div>
