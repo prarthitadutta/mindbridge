@@ -65,7 +65,7 @@ export default function SignUp() {
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <Link href="/">
-              <img src="/mindbridgelogo.png" alt="MindBridge" className="mx-auto" style={{ height: "180px", width: "auto" }} />
+              <img src="/mindbridgelogo.png" alt="MindBridge" className="mx-auto" style={{ height: "120px", width: "auto" }} />
             </Link>
             <h1 className="text-2xl font-bold text-gray-800 mt-4">Join MindBridge</h1>
             <p className="text-gray-500 text-sm mt-2">Who are you signing up as?</p>
