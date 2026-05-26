@@ -64,8 +64,8 @@ export default function SignUp() {
       <main className="min-h-screen bg-gradient-to-br from-[#f0f7ff] via-[#f7f0ff] to-[#f0fff7] flex items-center justify-center px-4">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <Link href="/" className="text-2xl font-bold text-[#4A90D9]">
-              Mind<span className="text-[#C084A0]">Bridge</span>
+            <Link href="/">
+              <img src="/mindbridgelogo.png" alt="MindBridge" className="mx-auto" style={{ height: "35px", width: "auto" }} />
             </Link>
             <h1 className="text-2xl font-bold text-gray-800 mt-4">Join MindBridge</h1>
             <p className="text-gray-500 text-sm mt-2">Who are you signing up as?</p>
@@ -120,8 +120,8 @@ export default function SignUp() {
     <main className="min-h-screen bg-gradient-to-br from-[#f0f7ff] via-[#f7f0ff] to-[#f0fff7] flex items-center justify-center px-4">
       <div className="bg-white rounded-3xl shadow-lg p-8 w-full max-w-md">
         <div className="text-center mb-6">
-          <Link href="/" className="text-2xl font-bold text-[#4A90D9]">
-            Mind<span className="text-[#7B5EA7]">Bridge</span>
+          <Link href="/">
+            <img src="/mindbridgelogo.png" alt="MindBridge" className="mx-auto" style={{ height: "35px", width: "auto" }} />
           </Link>
           <div className="mt-3 inline-flex items-center gap-2 bg-gray-50 rounded-full px-4 py-1.5">
             <span>{role === "user" ? "🧑‍💼" : "🧑‍⚕️"}</span>
