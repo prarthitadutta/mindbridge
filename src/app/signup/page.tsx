@@ -65,7 +65,7 @@ export default function SignUp() {
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <Link href="/">
-              <img src="/mindbridgelogo.png" alt="MindBridge" className="mx-auto" style={{ height: "35px", width: "auto" }} />
+              <img src="/mindbridgelogo.png" alt="MindBridge" className="mx-auto" style={{ height: "180px", width: "auto" }} />
             </Link>
             <h1 className="text-2xl font-bold text-gray-800 mt-4">Join MindBridge</h1>
             <p className="text-gray-500 text-sm mt-2">Who are you signing up as?</p>
@@ -121,7 +121,7 @@ export default function SignUp() {
       <div className="bg-white rounded-3xl shadow-lg p-8 w-full max-w-md">
         <div className="text-center mb-6">
           <Link href="/">
-            <img src="/mindbridgelogo.png" alt="MindBridge" className="mx-auto" style={{ height: "35px", width: "auto" }} />
+            <img src="/mindbridgelogo.png" alt="MindBridge" className="mx-auto" style={{ height: "180px", width: "auto" }} />
           </Link>
           <div className="mt-3 inline-flex items-center gap-2 bg-gray-50 rounded-full px-4 py-1.5">
             <span>{role === "user" ? "🧑‍💼" : "🧑‍⚕️"}</span>
