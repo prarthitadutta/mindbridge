@@ -48,8 +48,8 @@ function LoginForm() {
     <main className="min-h-screen bg-gradient-to-br from-[#f0f7ff] via-[#f7f0ff] to-[#f0fff7] flex items-center justify-center px-4">
       <div className="bg-white rounded-3xl shadow-lg p-8 w-full max-w-md">
         <div className="text-center mb-8">
-          <Link href="/" className="text-2xl font-bold text-[#4A90D9]">
-            Mind<span className="text-[#C084A0]">Bridge</span>
+          <Link href="/">
+            <img src="/mindbridgelogo.png" alt="MindBridge" className="h-20 w-auto mx-auto" />
           </Link>
           <p className="text-gray-500 text-sm mt-2">Welcome back 💙</p>
         </div>
