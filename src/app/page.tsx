@@ -74,9 +74,9 @@ export default function Home() {
         transition={{ duration: 0.6 }}
         className="flex items-center justify-between px-8 py-5 bg-white/70 backdrop-blur-md shadow-sm sticky top-0 z-40"
       >
-        <div className="text-2xl font-bold text-[#4A90D9]">
-          Mind<span className="text-[#C084A0]">Bridge</span>
-        </div>
+        <Link href="/">
+          <img src="/mindbridgelogo.png" alt="MindBridge" className="h-29 w-auto" />
+        </Link>
         <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-500">
           <Link href="/therapists" className="hover:text-[#4A90D9] transition">Find a Therapist</Link>
           <Link href="/quiz" className="hover:text-[#4A90D9] transition">Self Assessment</Link>
